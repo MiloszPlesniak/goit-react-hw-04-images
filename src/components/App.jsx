@@ -1,5 +1,4 @@
-import { Component } from 'react';
-
+import { useState, useEffect } from 'react';
 import { fetchPhoto } from 'services/FetchApiPixelby';
 
 import css from '../style/styles.module.css';
@@ -10,78 +9,69 @@ import Button from './Button/Button';
 import Loader from './Loader/Loader';
 import Modal from './Modal/Modal';
 
-export class App extends Component {
-  state = {
-    searchWord: '',
-    page: 1,
-    photos: [],
-    isLoading: false,
-    modal: false,
-    modalData: {},
-  };
+export const App = () => {
+  const [searchWord, setSerchWord] = useState('');
+  const [page, setPage] = useState(1);
+  const [photos, setPhotos] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [modal, setModal] = useState(false);
+  const [modalData, setModalData] = useState({});
 
-  async componentDidUpdate(prevProps, prevState) {
-    const { searchWord, page } = this.state;
-    const photos = await fetchPhoto(searchWord, page);
-
-    if (prevState.searchWord !== searchWord) {
-      this.setState({ photos });
+  useEffect(() => {
+    const addPhoto = async () => {
+      const photos = await fetchPhoto(searchWord, 1);
+      setPhotos(photos);
+    };
+    if (searchWord !== '') {
+      addPhoto();
     }
-  }
-
-  searchWord = e => {
-    e.preventDefault();
-    this.setState({ isLoading: true });
-    const searchWord = e.target.searchWord.value;
-    this.setState({
-      searchWord,
-    });
-    this.setState({ isLoading: false });
-  };
-
-  loadMore = () => {
-    this.setState({ isLoading: true });
-    this.setState({ page: this.state.page + 1 }, async () => {
-      const { searchWord, page, photos } = this.state;
+  }, [searchWord]);
+  useEffect(() => {
+    const morePhoto = async () => {
+      setLoading(true);
       const morePhoto = await fetchPhoto(searchWord, page);
-      this.setState({ photos: photos.concat(morePhoto) });
-    });
-    this.setState({ isLoading: false });
+      const allPhoto = photos.concat(morePhoto);
+      setPhotos(allPhoto);
+    };
+    if (page !== 1) {
+      morePhoto();
+      setLoading(false);
+    }
+  }, [page]);
+
+  function searchWordInput(e) {
+    e.preventDefault();
+    setLoading(true);
+    setSerchWord(e.target.searchWord.value);
+    setLoading(false);
+  }
+
+  const loadMore = async () => {
+    setPage(page + 1);
   };
 
-  showModal = e => {
+  const showModal = e => {
     if (e.target.nodeName === 'IMG') {
-      this.setState({
-        modalData: {
-          url: e.target.dataset.photo,
-          alt: e.target.alt,
-        },
+      setModalData({
+        url: e.target.dataset.photo,
+        alt: e.target.alt,
       });
-      this.setState({ modal: true });
+      setModal(true);
     }
   };
 
-  closeModal = () => {
-    this.setState({ modal: false });
+  const closeModal = () => {
+    setModal(false);
   };
 
-  render() {
-    const { isLoading, photos, modal } = this.state;
+  return (
+    <div className={css.App}>
+      <Searchbar onSubmit={searchWordInput} />
+      <ImageGallery photos={photos} handleShowModal={showModal}></ImageGallery>
+      {photos.length && <Button loadMore={loadMore} />}
+      {loading && <Loader />}
 
-    return (
-      <div className={css.App}>
-        <Searchbar onSubmit={this.searchWord} />
-        <ImageGallery
-          photos={this.state.photos}
-          handleShowModal={this.showModal}
-        ></ImageGallery>
-        {photos.length && <Button loadMore={this.loadMore} />}
-        {isLoading && <Loader />}
-
-        {modal && (
-          <Modal closeModal={this.closeModal} photoUrl={this.state.modalData} />
-        )}
-      </div>
-    );
-  }
-}
+      {modal && <Modal closeModal={closeModal} photoUrl={modalData} />}
+    </div>
+  );
+};
