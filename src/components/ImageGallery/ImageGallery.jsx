@@ -4,7 +4,6 @@ import css from './ImageGallery.module.css';
 import ImageGalleryItem from 'components/ImageGalleryItem/ImageGalleryItem';
 
 const ImageGallery = ({ photos, handleShowModal }) => {
-  
   return (
     <ul onClick={handleShowModal} className={css.ImageGallery}>
       {photos.map(item => {

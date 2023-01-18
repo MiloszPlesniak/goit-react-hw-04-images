@@ -37,6 +37,7 @@ export const App = () => {
       morePhoto();
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   function searchWordInput(e) {

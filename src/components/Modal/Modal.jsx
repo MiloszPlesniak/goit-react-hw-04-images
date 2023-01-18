@@ -21,10 +21,6 @@ const Modal = ({ closeModal, photoUrl }) => {
     }
   };
 
-  // componentDidMount() {
-  //   window.addEventListener('keydown', handleCheckKey);
-  // }
-
   return (
     <div onClick={handleCheckClick} className={css.Overlay}>
       <div className={css.Modal}>
