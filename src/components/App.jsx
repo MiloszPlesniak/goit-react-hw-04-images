@@ -10,31 +10,39 @@ import Loader from './Loader/Loader';
 import Modal from './Modal/Modal';
 
 export const App = () => {
+  const [perPage] = useState(12);
   const [searchWord, setSerchWord] = useState('');
   const [page, setPage] = useState(1);
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState(false);
   const [modalData, setModalData] = useState({});
+  const [disableBtn, setDisableBtn] = useState(true);
 
   useEffect(() => {
     const addPhoto = async () => {
-      const photos = await fetchPhoto(searchWord, 1);
-      setPhotos(photos);
+      const photos = await fetchPhoto(searchWord, perPage, page);
+      console.log(photos);
+      setPhotos(photos.hits);
     };
     if (searchWord !== '') {
       addPhoto();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchWord]);
   useEffect(() => {
-    const morePhoto = async () => {
+    const loadMorePhoto = async () => {
       setLoading(true);
-      const morePhoto = await fetchPhoto(searchWord, page);
-      const allPhoto = photos.concat(morePhoto);
+      const morePhoto = await fetchPhoto(searchWord, perPage, page);
+      const allPhoto = photos.concat(morePhoto.hits);
+      const maxPage = morePhoto.totalHits;
+
+      setDisableBtn(handleDisablePageOf(maxPage));
+
       setPhotos(allPhoto);
     };
     if (page !== 1) {
-      morePhoto();
+      loadMorePhoto();
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -65,11 +73,15 @@ export const App = () => {
     setModal(false);
   };
 
+  const handleDisablePageOf = maxPage => {
+    return maxPage / perPage >= page;
+  };
+
   return (
     <div className={css.App}>
       <Searchbar onSubmit={searchWordInput} />
-      <ImageGallery photos={photos} handleShowModal={showModal}></ImageGallery>
-      {photos.length && <Button loadMore={loadMore} />}
+      <ImageGallery photos={photos} handleShowModal={showModal} />
+      {photos.length && <Button onActive={disableBtn} loadMore={loadMore} />}
       {loading && <Loader />}
 
       {modal && <Modal closeModal={closeModal} photoUrl={modalData} />}
