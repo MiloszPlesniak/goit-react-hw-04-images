@@ -37,7 +37,7 @@ export const App = () => {
       const allPhoto = photos.concat(morePhoto.hits);
       const maxPage = morePhoto.totalHits;
 
-      setDisableBtn(handleDisablePageOf(maxPage));
+      setDisableBtn(areThePagesLeft(maxPage));
 
       setPhotos(allPhoto);
     };
@@ -73,7 +73,7 @@ export const App = () => {
     setModal(false);
   };
 
-  const handleDisablePageOf = maxPage => {
+  const areThePagesLeft = maxPage => {
     return maxPage / perPage >= page;
   };
 
@@ -81,7 +81,7 @@ export const App = () => {
     <div className={css.App}>
       <Searchbar onSubmit={searchWordInput} />
       <ImageGallery photos={photos} handleShowModal={showModal} />
-      {photos.length && <Button onActive={disableBtn} loadMore={loadMore} />}
+      {photos.length && disableBtn ? <Button loadMore={loadMore} /> : <p></p>}
       {loading && <Loader />}
 
       {modal && <Modal closeModal={closeModal} photoUrl={modalData} />}

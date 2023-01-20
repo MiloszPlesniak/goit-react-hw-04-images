@@ -2,18 +2,11 @@ import PropTypes from 'prop-types';
 
 import css from './Button.module.css';
 
-const Button = ({ loadMore, onActive }) => {
-  console.log(onActive);
+const Button = ({ loadMore }) => {
   return (
-    <div>
-      {onActive ? (
-        <button onClick={loadMore} className={css.Button}>
-          Load more
-        </button>
-      ) : (
-        <p></p>
-      )}
-    </div>
+    <button onClick={loadMore} className={css.Button}>
+      Load more
+    </button>
   );
 };
 
